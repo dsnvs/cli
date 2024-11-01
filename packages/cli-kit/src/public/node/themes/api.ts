@@ -11,7 +11,7 @@ import {AdminSession} from '@shopify/cli-kit/node/session'
 import {AbortError} from '@shopify/cli-kit/node/error'
 import {buildBulkUploadResults, buildTheme} from '@shopify/cli-kit/node/themes/factories'
 import {Result, Checksum, Key, Theme, ThemeAsset} from '@shopify/cli-kit/node/themes/types'
-import {outputDebug} from '@shopify/cli-kit/node/output'
+import {outputDebug, outputInfo} from '@shopify/cli-kit/node/output'
 import {sleep} from '@shopify/cli-kit/node/system'
 
 export type ThemeParams = Partial<Pick<Theme, 'name' | 'role' | 'processing' | 'src'>>
@@ -30,14 +30,15 @@ export async function fetchThemes(session: AdminSession): Promise<Theme[]> {
 }
 
 export async function createTheme(params: ThemeParams, session: AdminSession): Promise<Theme | undefined> {
+  outputInfo('Creating theme...')
   const response = await request('POST', '/themes', session, {theme: {...params}})
-  const minimumThemeAssets = [
-    {key: 'config/settings_schema.json', value: '[]'},
-    {key: 'layout/password.liquid', value: '{{ content_for_header }}{{ content_for_layout }}'},
-    {key: 'layout/theme.liquid', value: '{{ content_for_header }}{{ content_for_layout }}'},
-  ]
+  // const minimumThemeAssets = [
+  //   {key: 'config/settings_schema.json', value: '[]'},
+  //   {key: 'layout/password.liquid', value: '{{ content_for_header }}{{ content_for_layout }}'},
+  //   // {key: 'layout/theme.liquid', value: '{{ content_for_header }}{{ content_for_layout }}'},
+  // ]
 
-  await bulkUploadThemeAssets(response.json.theme.id, minimumThemeAssets, session)
+  // await bulkUploadThemeAssets(response.json.theme.id, minimumThemeAssets, session)
 
   return buildTheme({...response.json.theme, createdAtRuntime: true})
 }

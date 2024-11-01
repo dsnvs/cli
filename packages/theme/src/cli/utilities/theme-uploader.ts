@@ -184,13 +184,12 @@ export const MINIMUM_THEME_ASSETS = [
  * requests for _shopify_essential can work. We upload the minimum assets
  * here to make it faster.
  */
-async function ensureThemeCreation(theme: Theme, session: AdminSession, remoteChecksums: Checksum[]) {
-  const remoteAssetKeys = new Set(remoteChecksums.map((checksum) => checksum.key))
-  const missingAssets = MINIMUM_THEME_ASSETS.filter(({key}) => !remoteAssetKeys.has(key))
-
-  if (missingAssets.length > 0) {
-    await bulkUploadThemeAssets(theme.id, missingAssets, session)
-  }
+async function ensureThemeCreation(_theme: Theme, _session: AdminSession, _remoteChecksums: Checksum[]) {
+  // const remoteAssetKeys = new Set(remoteChecksums.map((checksum) => checksum.key))
+  // const missingAssets = MINIMUM_THEME_ASSETS.filter(({key}) => !remoteAssetKeys.has(key))
+  // if (missingAssets.length > 0) {
+  //   await bulkUploadThemeAssets(theme.id, missingAssets, session)
+  // }
 }
 
 interface SyncJob {
