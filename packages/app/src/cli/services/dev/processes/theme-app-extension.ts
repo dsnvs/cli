@@ -106,7 +106,7 @@ export async function setupPreviewThemeAppExtensionsProcess(
 }
 
 export const runThemeAppExtensionsServer: DevProcessFunction<ThemeAppExtensionServerOptions> = async (
-  _,
+  io,
   {theme, adminSession, storefrontPassword, themeExtensionDirectory, themeExtensionPort},
 ) => {
   const server = await initializeDevelopmentExtensionServer(theme, {
@@ -114,6 +114,13 @@ export const runThemeAppExtensionsServer: DevProcessFunction<ThemeAppExtensionSe
     storefrontPassword,
     themeExtensionDirectory,
     themeExtensionPort,
+  })
+
+  renderInfo({
+    headline: "Yo what's up?",
+    renderOptions: {
+      stdout: io.stdout as NodeJS.WriteStream,
+    },
   })
 
   await server.start()
