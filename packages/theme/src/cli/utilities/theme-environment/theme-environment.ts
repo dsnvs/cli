@@ -3,7 +3,6 @@ import {getHtmlHandler} from './html.js'
 import {getAssetsHandler} from './local-assets.js'
 import {getProxyHandler} from './proxy.js'
 import {reconcileAndPollThemeEditorChanges} from './remote-theme-watcher.js'
-import {uploadTheme} from '../theme-uploader.js'
 import {renderTasksToStdErr} from '../theme-ui.js'
 import {createAbortCatchError} from '../errors.js'
 import {createApp, defineEventHandler, defineLazyEventHandler, toNodeListener} from 'h3'
@@ -38,15 +37,15 @@ function ensureThemeEnvironmentSetup(theme: Theme, ctx: DevServerContext) {
     .catch(abort)
 
   const uploadPromise = reconcilePromise
-    .then(async ({updatedRemoteChecksumsPromise}) => {
-      const updatedRemoteChecksums = await updatedRemoteChecksumsPromise
-      return uploadTheme(theme, ctx.session, updatedRemoteChecksums, ctx.localThemeFileSystem, {
-        nodelete: ctx.options.noDelete,
-        deferPartialWork: true,
-        backgroundWorkCatch: abort,
-      })
-    })
-    .catch(abort)
+  // .then(async ({updatedRemoteChecksumsPromise}) => {
+  // const updatedRemoteChecksums = await updatedRemoteChecksumsPromise
+  // return uploadTheme(theme, ctx.session, updatedRemoteChecksums, ctx.localThemeFileSystem, {
+  //   nodelete: ctx.options.noDelete,
+  //   deferPartialWork: true,
+  //   backgroundWorkCatch: abort,
+  // })
+  // })
+  // .catch(abort)
 
   return {
     workPromise: uploadPromise.then((result) => result.workPromise).catch(abort),
@@ -63,9 +62,9 @@ function ensureThemeEnvironmentSetup(theme: Theme, ctx: DevServerContext) {
         ])
       }
 
-      const {renderThemeSyncProgress} = await uploadPromise
+      // const {renderThemeSyncProgress} = await uploadPromise
 
-      await renderThemeSyncProgress()
+      // await renderThemeSyncProgress()
     },
   }
 }
