@@ -97,9 +97,16 @@ abstract class BaseCommand extends Command {
     options?: Input<TFlags, TGlobalFlags, TArgs>,
     argv?: string[],
   ): Promise<ParserOutput<TFlags, TGlobalFlags, TArgs> & {argv: string[]}> {
+    // OCLIF
     let result = await super.parse<TFlags, TGlobalFlags, TArgs>(options, argv)
+
+    // Decorate with environments
     result = await this.resultWithEnvironment<TFlags, TGlobalFlags, TArgs>(result, options, argv)
+
+    // ??
     await addFromParsedFlags(result.flags)
+
+    // <==
     return {...result, ...{argv: result.argv as string[]}}
   }
 

@@ -103,9 +103,8 @@ export default class Push extends ThemeCommand {
     }),
   }
 
-  async run(): Promise<void> {
-    const {flags} = await this.parse(Push)
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async runCommand(flags: any): Promise<void> {
     const pushFlags: PushFlags = {
       path: flags.path,
       password: flags.password,
