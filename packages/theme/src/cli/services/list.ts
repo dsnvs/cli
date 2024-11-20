@@ -49,6 +49,7 @@ export async function list(adminSession: AdminSession, options: Options) {
       role: formattedRole,
     }
   })
-
+  // fails on first, passes on second.
+  outputInfo(`\n ${adminSession.storeFqdn}`)
   renderTable({rows: themes, columns})
 }

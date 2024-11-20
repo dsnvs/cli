@@ -5,6 +5,7 @@ import {outputContent, outputToken} from '@shopify/cli-kit/node/output'
 
 export function ensureThemeStore(flags: {store: string | undefined}): string {
   const store = flags.store || getThemeStore()
+  console.log('store:', store)
   if (!store) {
     throw new AbortError(
       'A store is required',

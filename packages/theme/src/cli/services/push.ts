@@ -121,7 +121,6 @@ export async function push(flags: PushFlags): Promise<void> {
   }
 
   const {path} = flags
-
   configureCLIEnvironment({
     verbose: flags.verbose,
     noColor: flags.noColor,
