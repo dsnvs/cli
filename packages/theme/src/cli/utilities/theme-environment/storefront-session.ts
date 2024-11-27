@@ -6,13 +6,15 @@ import {outputDebug} from '@shopify/cli-kit/node/output'
 
 export class ShopifyEssentialError extends Error {}
 
+// if this returns flase
 export async function isStorefrontPasswordProtected(storeURL: string): Promise<boolean> {
   const response = await fetch(prependHttps(storeURL), {
     method: 'GET',
     redirect: 'manual',
   })
 
-  if (response.status !== 302) return false
+  // the storefront is NOT password protected
+  if (response.status !== 301) return false
 
   return response.headers.get('location')?.endsWith('/password') ?? false
 }
@@ -61,6 +63,10 @@ export async function getStorefrontSessionCookies(
 
   cookieRecord._shopify_essential = shopifyEssential
 
+  // password wil be undefined - we only set the value if the storefront is password protected
+  // SO, we never grab tih cookie
+  // BUT some how the dev preview still works????? <---------- WTFFFFFFFFFF
+  // MAYBEEEE what's happening is that the storefront_digest cookie is actually allowing us to skip the password page typically
   if (!password) {
     /**
      * When the store is not password protected, storefront_digest is not
