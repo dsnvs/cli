@@ -5,8 +5,8 @@ import {list} from '../../services/list.js'
 import {ensureThemeStore} from '../../utilities/theme-store.js'
 import {Flags} from '@oclif/core'
 import {globalFlags, jsonFlag} from '@shopify/cli-kit/node/cli'
-import {execa} from 'execa'
 import {ensureAuthenticatedThemes} from '@shopify/cli-kit/node/session'
+import {loadEnvironment} from '@shopify/cli-kit/node/environments'
 
 export default class List extends ThemeCommand {
   static description = 'Lists the themes in your store, along with their IDs and statuses.'
@@ -34,24 +34,21 @@ export default class List extends ThemeCommand {
 
   async run(): Promise<void> {
     const {flags} = await this.parse(List)
-    // const store = ensureThemeStore(flags)
-    // const adminSession = await ensureAuthenticatedThemes(store, flags.password)
 
     if (flags.environment) {
-      const results = await Promise.all(
+      await Promise.all(
         flags.environment.map(async (env) => {
-          const {stdout} = await execa('shopify', ['theme', 'list', '--environment', env])
-          return {
+          const envConfig = await loadEnvironment(env, 'shopify.theme.toml')
+          const envFlags = {
+            ...flags,
+            ...envConfig,
             environment: env,
-            output: stdout,
           }
+          const store = ensureThemeStore(envFlags)
+          const adminSession = await ensureAuthenticatedThemes(store, envFlags.password)
+          await list(adminSession, envFlags)
         }),
       )
-
-      results.forEach(({environment, output}) => {
-        console.log(`\nEnvironment: ${environment}`)
-        console.log(output)
-      })
     } else {
       const store = ensureThemeStore(flags)
       const adminSession = await ensureAuthenticatedThemes(store, flags.password)
@@ -59,3 +56,20 @@ export default class List extends ThemeCommand {
     }
   }
 }
+// Note: I think paraller is what we are looking for overall, and but I'm not sure what will surface with push/pull commands.
+
+// Sequential Option?
+// if (flags.environment) {
+//   for (const env of flags.environment) {
+//     const envConfig = await loadEnvironment(env, 'shopify.theme.toml')
+//     const envFlags = {
+//       ...flags,
+//       ...envConfig,
+//       environment: env,
+//     }
+//     const store = ensureThemeStore(envFlags)
+//     const adminSession = await ensureAuthenticatedThemes(store, envFlags.password)
+//     console.log(`\nEnvironment: ${env}`)
+//     await list(adminSession, envFlags)
+//   }
+// }
