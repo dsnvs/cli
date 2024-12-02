@@ -1,11 +1,12 @@
-import {ensureThemeStore} from '../../utilities/theme-store.js'
-import {list} from '../../services/list.js'
 import {ALLOWED_ROLES, Role} from '../../utilities/theme-selector/fetch.js'
 import {themeFlags} from '../../flags.js'
 import ThemeCommand from '../../utilities/theme-command.js'
+import {list} from '../../services/list.js'
+import {ensureThemeStore} from '../../utilities/theme-store.js'
 import {Flags} from '@oclif/core'
-import {ensureAuthenticatedThemes} from '@shopify/cli-kit/node/session'
 import {globalFlags, jsonFlag} from '@shopify/cli-kit/node/cli'
+import {execa} from 'execa'
+import {ensureAuthenticatedThemes} from '@shopify/cli-kit/node/session'
 
 export default class List extends ThemeCommand {
   static description = 'Lists the themes in your store, along with their IDs and statuses.'
@@ -31,11 +32,30 @@ export default class List extends ThemeCommand {
     environment: themeFlags.environment,
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async runCommand(flags: any): Promise<void> {
-    const store = ensureThemeStore(flags)
-    const adminSession = await ensureAuthenticatedThemes(store, flags.password)
+  async run(): Promise<void> {
+    const {flags} = await this.parse(List)
+    // const store = ensureThemeStore(flags)
+    // const adminSession = await ensureAuthenticatedThemes(store, flags.password)
 
-    await list(adminSession, flags)
+    if (flags.environment) {
+      const results = await Promise.all(
+        flags.environment.map(async (env) => {
+          const {stdout} = await execa('shopify', ['theme', 'list', '--environment', env])
+          return {
+            environment: env,
+            output: stdout,
+          }
+        }),
+      )
+
+      results.forEach(({environment, output}) => {
+        console.log(`\nEnvironment: ${environment}`)
+        console.log(output)
+      })
+    } else {
+      const store = ensureThemeStore(flags)
+      const adminSession = await ensureAuthenticatedThemes(store, flags.password)
+      await list(adminSession, flags)
+    }
   }
 }
