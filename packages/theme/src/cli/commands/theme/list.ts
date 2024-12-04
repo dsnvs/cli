@@ -34,11 +34,13 @@ export default class List extends ThemeCommand {
 
   async run(): Promise<void> {
     const {flags} = await this.parse(List)
+    console.log('Were in the list command')
 
     if (flags.environment) {
       await Promise.all(
         flags.environment.map(async (env) => {
           const envConfig = await loadEnvironment(env, 'shopify.theme.toml')
+          console.log(`Environment config for ${env}:`, envConfig)
           const envFlags = {
             ...flags,
             ...envConfig,
@@ -56,20 +58,3 @@ export default class List extends ThemeCommand {
     }
   }
 }
-// Note: I think paraller is what we are looking for overall, and but I'm not sure what will surface with push/pull commands.
-
-// Sequential Option?
-// if (flags.environment) {
-//   for (const env of flags.environment) {
-//     const envConfig = await loadEnvironment(env, 'shopify.theme.toml')
-//     const envFlags = {
-//       ...flags,
-//       ...envConfig,
-//       environment: env,
-//     }
-//     const store = ensureThemeStore(envFlags)
-//     const adminSession = await ensureAuthenticatedThemes(store, envFlags.password)
-//     console.log(`\nEnvironment: ${env}`)
-//     await list(adminSession, envFlags)
-//   }
-// }
