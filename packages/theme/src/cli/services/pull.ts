@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import {downloadTheme} from '../utilities/theme-downloader.js'
 import {hasRequiredThemeDirectories, mountThemeFileSystem} from '../utilities/theme-fs.js'
 import {currentDirectoryConfirmed, themeComponent} from '../utilities/theme-ui.js'
@@ -95,12 +96,18 @@ export interface PullFlags {
  *
  * @param flags - All flags are optional.
  */
-export async function pull(flags: PullFlags): Promise<void> {
+export async function pull(flags: PullFlags, adminSession2?: AdminSession): Promise<void> {
   configureCLIEnvironment({verbose: flags.verbose, noColor: flags.noColor})
   showEmbeddedCLIWarning()
 
-  const store = ensureThemeStore({store: flags.store})
-  const adminSession = await ensureAuthenticatedThemes(store, flags.password)
+  let adminSession: AdminSession
+
+  if (!adminSession2) {
+    const store = ensureThemeStore({store: flags.store})
+    adminSession = await ensureAuthenticatedThemes(store, flags.password)
+  } else {
+    adminSession = adminSession2
+  }
 
   const developmentThemeManager = new DevelopmentThemeManager(adminSession)
   const developmentTheme = await (flags.development ? developmentThemeManager.find() : developmentThemeManager.fetch())
@@ -155,8 +162,9 @@ async function executePull(theme: Theme, session: AdminSession, options: PullOpt
 
   const store = session.storeFqdn
   const themeId = theme.id
-
+  console.log(`Pulling theme ${themeId} from store ${store}`)
   await downloadTheme(theme, session, themeChecksums, themeFileSystem, options)
+  console.log(`Downloaded theme ${themeId} from store ${store}`)
 
   renderSuccess({
     body: ['The theme', ...themeComponent(theme), 'has been pulled.'],

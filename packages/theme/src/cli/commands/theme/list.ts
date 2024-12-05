@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import {ALLOWED_ROLES, Role} from '../../utilities/theme-selector/fetch.js'
 import {themeFlags} from '../../flags.js'
 import ThemeCommand from '../../utilities/theme-command.js'

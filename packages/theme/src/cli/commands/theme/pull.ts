@@ -1,9 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-console */
 import {themeFlags} from '../../flags.js'
 import ThemeCommand from '../../utilities/theme-command.js'
 import {pull, PullFlags} from '../../services/pull.js'
+import {ensureThemeStore} from '../../utilities/theme-store.js'
 import {globalFlags} from '@shopify/cli-kit/node/cli'
 import {Flags} from '@oclif/core'
 import {loadEnvironment} from '@shopify/cli-kit/node/environments'
+import {ensureAuthenticatedThemes} from '@shopify/cli-kit/node/session'
 
 export default class Pull extends ThemeCommand {
   static summary = 'Download your remote theme files locally.'
@@ -61,21 +67,32 @@ If no theme is specified, then you're prompted to select the theme to pull from 
     const {flags} = await this.parse(Pull)
     if (flags.environment && flags.environment.length > 1) {
       console.log('Pulling from multiple environments')
-      const results = await Promise.all(
+
+      const sessions: any = {}
+
+      for (const env of flags.environment) {
+        console.log(`Pulling from environment ${env}`)
+        const envConfig = await loadEnvironment(env, 'shopify.theme.toml')
+
+        const store = ensureThemeStore({store: envConfig?.store as any})
+        sessions[env] = await ensureAuthenticatedThemes(store, envConfig?.password as any)
+      }
+
+      await Promise.all(
         flags.environment.map(async (env) => {
           console.log(`Pulling from environment ${env}`)
           const envConfig = await loadEnvironment(env, 'shopify.theme.toml')
-          console.log(`Environment config for ${env}:`, envConfig)
           const pullFlags: PullFlags = {
             ...flags,
             ...envConfig,
             environment: [env],
           }
           console.log(`Pull flags:`, pullFlags)
-          return pull(pullFlags)
+          await pull(pullFlags, sessions[env])
         }),
       )
-      await Promise.all(results)
+
+      // await Promise.all(results)
     } else {
       const pullFlags: PullFlags = {
         path: flags.path,
