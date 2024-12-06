@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* eslint-disable no-await-in-loop */
-/* eslint-disable no-console */
+
 import {themeFlags} from '../../flags.js'
 import ThemeCommand from '../../utilities/theme-command.js'
 import {pull, PullFlags} from '../../services/pull.js'
@@ -66,12 +66,9 @@ If no theme is specified, then you're prompted to select the theme to pull from 
   async run(): Promise<void> {
     const {flags} = await this.parse(Pull)
     if (flags.environment && flags.environment.length > 1) {
-      console.log('Pulling from multiple environments')
-
       const sessions: any = {}
 
       for (const env of flags.environment) {
-        console.log(`Pulling from environment ${env}`)
         const envConfig = await loadEnvironment(env, 'shopify.theme.toml')
 
         const store = ensureThemeStore({store: envConfig?.store as any})
@@ -80,19 +77,15 @@ If no theme is specified, then you're prompted to select the theme to pull from 
 
       await Promise.all(
         flags.environment.map(async (env) => {
-          console.log(`Pulling from environment ${env}`)
           const envConfig = await loadEnvironment(env, 'shopify.theme.toml')
           const pullFlags: PullFlags = {
             ...flags,
             ...envConfig,
             environment: [env],
           }
-          console.log(`Pull flags:`, pullFlags)
           await pull(pullFlags, sessions[env])
         }),
       )
-
-      // await Promise.all(results)
     } else {
       const pullFlags: PullFlags = {
         path: flags.path,

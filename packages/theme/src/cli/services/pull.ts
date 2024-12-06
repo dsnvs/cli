@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import {downloadTheme} from '../utilities/theme-downloader.js'
 import {hasRequiredThemeDirectories, mountThemeFileSystem} from '../utilities/theme-fs.js'
 import {currentDirectoryConfirmed, themeComponent} from '../utilities/theme-ui.js'
@@ -162,9 +161,7 @@ async function executePull(theme: Theme, session: AdminSession, options: PullOpt
 
   const store = session.storeFqdn
   const themeId = theme.id
-  console.log(`Pulling theme ${themeId} from store ${store}`)
   await downloadTheme(theme, session, themeChecksums, themeFileSystem, options)
-  console.log(`Downloaded theme ${themeId} from store ${store}`)
 
   renderSuccess({
     body: ['The theme', ...themeComponent(theme), 'has been pulled.'],
