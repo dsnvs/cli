@@ -1,8 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import {themeFlags} from '../../flags.js'
 import ThemeCommand from '../../utilities/theme-command.js'
 import {pull, PullFlags} from '../../services/pull.js'
+import {ensureThemeStore} from '../../utilities/theme-store.js'
 import {globalFlags} from '@shopify/cli-kit/node/cli'
 import {Flags} from '@oclif/core'
+import {loadEnvironment} from '@shopify/cli-kit/node/environments'
+import {ensureAuthenticatedThemes} from '@shopify/cli-kit/node/session'
 
 export default class Pull extends ThemeCommand {
   static summary = 'Download your remote theme files locally.'
@@ -58,22 +63,39 @@ If no theme is specified, then you're prompted to select the theme to pull from 
 
   async run(): Promise<void> {
     const {flags} = await this.parse(Pull)
-    const pullFlags: PullFlags = {
-      path: flags.path,
-      password: flags.password,
-      environment: flags.environment,
-      store: flags.store,
-      theme: flags.theme,
-      development: flags.development,
-      live: flags.live,
-      nodelete: flags.nodelete,
-      only: flags.only,
-      ignore: flags.ignore,
-      force: flags.force,
-      verbose: flags.verbose,
-      noColor: flags['no-color'],
-    }
+    if (flags.environment && flags.environment.length > 1) {
+      await Promise.all(
+        flags.environment.map(async (env) => {
+          const envConfig = await loadEnvironment(env, 'shopify.theme.toml')
+          const store = ensureThemeStore({store: envConfig?.store as any})
+          const session = await ensureAuthenticatedThemes(store, envConfig?.password as any)
 
-    await pull(pullFlags)
+          const pullFlags: PullFlags = {
+            ...flags,
+            ...envConfig,
+            environment: [env],
+          }
+          return pull(pullFlags, session)
+        }),
+      )
+    } else {
+      const pullFlags: PullFlags = {
+        path: flags.path,
+        password: flags.password,
+        environment: flags.environment,
+        store: flags.store,
+        theme: flags.theme,
+        development: flags.development,
+        live: flags.live,
+        nodelete: flags.nodelete,
+        only: flags.only,
+        ignore: flags.ignore,
+        force: flags.force,
+        verbose: flags.verbose,
+        noColor: flags['no-color'],
+      }
+
+      await pull(pullFlags)
+    }
   }
 }

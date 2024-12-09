@@ -54,7 +54,7 @@ export interface PushFlags {
   store?: string
 
   /** The environment to apply to the current command. */
-  environment?: string
+  environment?: string[]
 
   /** Theme ID or name of the remote theme. */
   theme?: string
@@ -101,9 +101,24 @@ export interface PushFlags {
  *
  * @param flags - The flags for the push operation.
  */
+<<<<<<< HEAD
 export async function push(flags: PushFlags): Promise<void> {
-  const {path} = flags
+=======
+export async function push(flags: PushFlags, adminSession2?: AdminSession): Promise<void> {
+  if (flags.strict) {
+    const outputType = flags.json ? 'json' : 'text'
+    const {offenses} = await runThemeCheck(flags.path ?? cwd(), outputType)
 
+    if (offenses.length > 0) {
+      const errorOffenses = offenses.filter((offense) => offense.severity === Severity.ERROR)
+      if (errorOffenses.length > 0) {
+        throw new AbortError('Theme check failed. Please fix the errors before pushing.')
+      }
+    }
+  }
+
+>>>>>>> 5f97967beb (.)
+  const {path} = flags
   configureCLIEnvironment({
     verbose: flags.verbose,
     noColor: flags.noColor,
@@ -111,8 +126,16 @@ export async function push(flags: PushFlags): Promise<void> {
 
   const force = flags.force ?? false
 
-  const store = ensureThemeStore({store: flags.store})
-  const adminSession = await ensureAuthenticatedThemes(store, flags.password)
+  // const adminSession = await ensureAuthenticatedThemes(store, flags.password)
+
+  let adminSession: AdminSession
+
+  if (!adminSession2) {
+    const store = ensureThemeStore({store: flags.store})
+    adminSession = await ensureAuthenticatedThemes(store, flags.password)
+  } else {
+    adminSession = adminSession2
+  }
 
   const workingDirectory = path ? resolvePath(path) : cwd()
   if (!(await hasRequiredThemeDirectories(workingDirectory)) && !(await currentDirectoryConfirmed(force))) {

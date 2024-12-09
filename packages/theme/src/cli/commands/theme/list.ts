@@ -1,11 +1,18 @@
-import {ensureThemeStore} from '../../utilities/theme-store.js'
-import {list} from '../../services/list.js'
+/* eslint-disable no-console */
 import {ALLOWED_ROLES, Role} from '../../utilities/theme-selector/fetch.js'
 import {themeFlags} from '../../flags.js'
 import ThemeCommand from '../../utilities/theme-command.js'
+import {list} from '../../services/list.js'
+import {ensureThemeStore} from '../../utilities/theme-store.js'
 import {Flags} from '@oclif/core'
+<<<<<<< HEAD
 import {ensureAuthenticatedThemes} from '@shopify/cli-kit/node/session'
 import {globalFlags} from '@shopify/cli-kit/node/cli'
+=======
+import {globalFlags, jsonFlag} from '@shopify/cli-kit/node/cli'
+import {ensureAuthenticatedThemes} from '@shopify/cli-kit/node/session'
+import {loadEnvironment} from '@shopify/cli-kit/node/environments'
+>>>>>>> 5f97967beb (.)
 
 export default class List extends ThemeCommand {
   static description = 'Lists the themes in your store, along with their IDs and statuses.'
@@ -37,9 +44,27 @@ export default class List extends ThemeCommand {
 
   async run(): Promise<void> {
     const {flags} = await this.parse(List)
-    const store = ensureThemeStore(flags)
-    const adminSession = await ensureAuthenticatedThemes(store, flags.password)
+    console.log('Were in the list command')
 
-    await list(adminSession, flags)
+    if (flags.environment) {
+      await Promise.all(
+        flags.environment.map(async (env) => {
+          const envConfig = await loadEnvironment(env, 'shopify.theme.toml')
+          console.log(`Environment config for ${env}:`, envConfig)
+          const envFlags = {
+            ...flags,
+            ...envConfig,
+            environment: env,
+          }
+          const store = ensureThemeStore(envFlags)
+          const adminSession = await ensureAuthenticatedThemes(store, envFlags.password)
+          await list(adminSession, envFlags)
+        }),
+      )
+    } else {
+      const store = ensureThemeStore(flags)
+      const adminSession = await ensureAuthenticatedThemes(store, flags.password)
+      await list(adminSession, flags)
+    }
   }
 }

@@ -49,6 +49,6 @@ export async function list(adminSession: AdminSession, options: Options) {
       role: formattedRole,
     }
   })
-
+  outputInfo(`\n ${adminSession.storeFqdn}`)
   renderTable({rows: themes, columns})
 }
