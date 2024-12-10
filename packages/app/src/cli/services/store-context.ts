@@ -34,7 +34,14 @@ export async function storeContext({
   const {app, organization, developerPlatformClient} = appContextResult
   let selectedStore: OrganizationStore
 
-  const cachedStoreURL = app.configuration.build?.dev_store_url ?? app.hiddenConfig.dev_store_url
+  const devStoreUrlFromAppConfig = app.configuration.build?.dev_store_url
+  const devStoreUrlFromHiddenConfig = app.hiddenConfig.dev_store_url
+
+  const cachedStoreURL = devStoreUrlFromAppConfig ?? devStoreUrlFromHiddenConfig
+
+  // If there is no cached value in the app.toml, start using the hidden config to save it.
+  const shouldUseHiddenConfig = devStoreUrlFromAppConfig === undefined
+
   // If forceReselectStore is true, ignore the cached storeFqdn in the app configuration.
   const cachedStoreInToml = forceReselectStore ? undefined : cachedStoreURL
 
@@ -55,7 +62,7 @@ export async function storeContext({
   selectedStore.shopDomain = await normalizeStoreFqdn(selectedStore.shopDomain)
 
   // Save the selected store in the configFile
-  if (selectedStore.shopDomain !== cachedStoreURL) {
+  if (selectedStore.shopDomain !== cachedStoreURL && shouldUseHiddenConfig) {
     await app.updateHiddenConfig({dev_store_url: selectedStore.shopDomain})
   }
 

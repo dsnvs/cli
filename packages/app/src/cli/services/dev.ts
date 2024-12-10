@@ -102,9 +102,14 @@ async function prepareForDev(commandOptions: DevOptions): Promise<DevConfig> {
     organization: commandOptions.organization,
   })
 
-  // If the dev_store_url is set in the app configuration, remove it.
+  // If the dev_store_url is set in the app configuration, keep updating it.
+  // If not, `store-context.ts` will take care of caching it in the hidden config.
   if (app.configuration.build?.dev_store_url) {
-    const patch = {build: {dev_store_url: undefined}}
+    app.configuration.build = {
+      ...app.configuration.build,
+      dev_store_url: store.shopDomain,
+    }
+    const patch = {build: {dev_store_url: store.shopDomain}}
     await patchAppConfigurationFile({path: app.configuration.path, patch, schema: app.configSchema})
   }
 
