@@ -5,14 +5,9 @@ import ThemeCommand from '../../utilities/theme-command.js'
 import {list} from '../../services/list.js'
 import {ensureThemeStore} from '../../utilities/theme-store.js'
 import {Flags} from '@oclif/core'
-<<<<<<< HEAD
-import {ensureAuthenticatedThemes} from '@shopify/cli-kit/node/session'
 import {globalFlags} from '@shopify/cli-kit/node/cli'
-=======
-import {globalFlags, jsonFlag} from '@shopify/cli-kit/node/cli'
 import {ensureAuthenticatedThemes} from '@shopify/cli-kit/node/session'
 import {loadEnvironment} from '@shopify/cli-kit/node/environments'
->>>>>>> 5f97967beb (.)
 
 export default class List extends ThemeCommand {
   static description = 'Lists the themes in your store, along with their IDs and statuses.'

@@ -101,23 +101,19 @@ export interface PushFlags {
  *
  * @param flags - The flags for the push operation.
  */
-<<<<<<< HEAD
-export async function push(flags: PushFlags): Promise<void> {
-=======
 export async function push(flags: PushFlags, adminSession2?: AdminSession): Promise<void> {
-  if (flags.strict) {
-    const outputType = flags.json ? 'json' : 'text'
-    const {offenses} = await runThemeCheck(flags.path ?? cwd(), outputType)
+  // if (flags.strict) {
+  //   const outputType = flags.json ? 'json' : 'text'
+  //   const {offenses} = await runThemeCheck(flags.path ?? cwd(), outputType)
 
-    if (offenses.length > 0) {
-      const errorOffenses = offenses.filter((offense) => offense.severity === Severity.ERROR)
-      if (errorOffenses.length > 0) {
-        throw new AbortError('Theme check failed. Please fix the errors before pushing.')
-      }
-    }
-  }
+  //   if (offenses.length > 0) {
+  //     const errorOffenses = offenses.filter((offense) => offense.severity === Severity.ERROR)
+  //     if (errorOffenses.length > 0) {
+  //       throw new AbortError('Theme check failed. Please fix the errors before pushing.')
+  //     }
+  //   }
+  // }
 
->>>>>>> 5f97967beb (.)
   const {path} = flags
   configureCLIEnvironment({
     verbose: flags.verbose,
@@ -352,4 +348,7 @@ async function confirmPushToTheme(themeRole: Role, allowLive: boolean | undefine
     return renderConfirmationPrompt(options)
   }
   return true
+}
+function runThemeCheck(arg0: string, outputType: string): {offenses: unknown} | PromiseLike<{offenses: unknown}> {
+  throw new Error('Function not implemented.')
 }
