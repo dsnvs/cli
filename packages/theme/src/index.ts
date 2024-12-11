@@ -8,6 +8,7 @@ import LanguageServer from './cli/commands/theme/language-server.js'
 import ListCommnd from './cli/commands/theme/list.js'
 import Open from './cli/commands/theme/open.js'
 import Package from './cli/commands/theme/package.js'
+import Profile from './cli/commands/theme/profile.js'
 import Publish from './cli/commands/theme/publish.js'
 import Pull from './cli/commands/theme/pull.js'
 import Push from './cli/commands/theme/push.js'
@@ -26,6 +27,7 @@ const COMMANDS = {
   'theme:list': ListCommnd,
   'theme:open': Open,
   'theme:package': Package,
+  'theme:profile': Profile,
   'theme:publish': Publish,
   'theme:pull': Pull,
   'theme:push': Push,
